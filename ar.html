@@ -110,10 +110,14 @@
     #toast{position:fixed;top:76px;left:50%;transform:translateX(-50%) translateY(-16px);background:rgba(10,0,14,.92);backdrop-filter:blur(16px);border:1px solid rgba(255,110,199,.3);border-radius:30px;padding:10px 20px;font-size:13px;color:#fff;opacity:0;transition:opacity .3s,transform .3s;z-index:5000;pointer-events:none;white-space:nowrap}
     #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-    /* MindAR — เต็มจอ ไม่มีดำ */
-    .mindar-ui-overlay{z-index:1!important}
-    a-scene{position:fixed!important;top:0!important;left:0!important;width:100vw!important;height:100vh!important}
-    canvas{display:block}
+    /* MindAR — แก้จอดำครึ่งล่าง */
+    html, body { width:100%; height:100%; overflow:hidden; }
+    a-scene { position:fixed!important; top:0!important; left:0!important; width:100%!important; height:100%!important; z-index:2!important; }
+    /* ให้ video canvas ของ MindAR เต็มจอ */
+    a-scene canvas { width:100%!important; height:100%!important; object-fit:cover; }
+    .mindar-ui-overlay { display:none!important; }
+    /* แก้ video element ใน AR ให้โชว์ */
+    [mindar-image-target] a-video { visibility:visible!important; opacity:1!important; }
   </style>
 </head>
 <body>
@@ -256,44 +260,60 @@
   mindar-image="imageTargetSrc: markers/targets.mind; autoStart: false; uiLoading: no; uiError: no; uiScanning: no;"
   color-space="sRGB"
   embedded
-  renderer="colorManagement: true; physicallyCorrectLights: true;"
   vr-mode-ui="enabled: false"
   device-orientation-permission-ui="enabled: false"
   id="ar-scene"
-  style="display:none; width:100vw; height:100vh; position:fixed; top:0; left:0; z-index:2;">
+  style="display:none;">
 
   <a-assets>
-    <video id="ar-video" src="hyeen_and_ptong.mp4" preload="auto" playsinline webkit-playsinline crossorigin="anonymous"></video>
+    <video
+      id="ar-video"
+      src="hyeen_and_ptong.mp4"
+      preload="auto"
+      loop="false"
+      playsinline
+      webkit-playsinline
+      crossorigin="anonymous">
+    </video>
   </a-assets>
 
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
   <a-entity mindar-image-target="targetIndex: 0" id="hiro-marker">
-    <!-- วิดีโอ width=1 height=0.5625 = อัตราส่วน 16:9 พอดีกับมาร์กเกอร์ -->
-    <a-video src="#ar-video"
+
+    <!-- วิดีโอ — ใช้ a-plane + material แทน a-video เพื่อความเสถียรบน iOS -->
+    <a-plane
       width="1" height="0.5625"
       position="0 0 0.001"
       rotation="0 0 0"
-      material="side: double; shader: flat">
-    </a-video>
-    <!-- กรอบ -->
-    <a-plane width="1.04" height="0.6"
-      position="0 0 0"
-      material="color: #ff6ec7; opacity: 0.15; side: double; shader: flat">
+      material="src: #ar-video; shader: flat; side: double;">
     </a-plane>
-    <!-- ชื่อ -->
-    <a-text value="Hyeen & Ptong" align="center" color="#ffffff"
-      width="1.4" position="0 0.42 0"
+
+    <!-- กรอบเรืองแสง -->
+    <a-plane
+      width="1.06" height="0.62"
+      position="0 0 -0.001"
+      material="color: #ff6ec7; opacity: 0.2; shader: flat; side: double;">
+    </a-plane>
+
+    <!-- ชื่อแบรนด์ -->
+    <a-text value="Hyeen & Ptong"
+      align="center" color="#ffffff"
+      width="1.4" position="0 0.42 0.001"
       font="https://cdn.aframe.io/fonts/Exo2Bold.fnt">
     </a-text>
-    <a-text value="Fashion Collection" align="center" color="#ff6ec7"
-      width="1" position="0 0.33 0">
+    <a-text value="Fashion Collection"
+      align="center" color="#ff6ec7"
+      width="1" position="0 0.34 0.001">
     </a-text>
+
     <!-- ราคา -->
-    <a-text value="฿100,000" align="center" color="#b44fff"
-      width="0.8" position="0 -0.38 0"
+    <a-text value="฿100,000"
+      align="center" color="#b44fff"
+      width="0.9" position="0 -0.38 0.001"
       font="https://cdn.aframe.io/fonts/Exo2Bold.fnt">
     </a-text>
+
   </a-entity>
 
 </a-scene>
@@ -321,16 +341,28 @@
   });
 
   // ── Splash → Start ──────────────────────────────
-  document.getElementById('start-btn').addEventListener('click',()=>{
+  document.getElementById('start-btn').addEventListener('click', () => {
     document.getElementById('splash').classList.add('hidden');
-    const scene=document.getElementById('ar-scene');
-    scene.style.display='block';
+    const scene = document.getElementById('ar-scene');
+    scene.style.display = 'block';
+    scene.style.width = '100vw';
+    scene.style.height = '100vh';
 
-    // Start MindAR after scene is visible
-    scene.addEventListener('loaded',()=>{
-      const mindar=scene.systems['mindar-image-system'];
-      if(mindar) mindar.start();
-    },{once:true});
+    // รอให้ scene โหลดเสร็จแล้วค่อย start MindAR
+    const tryStart = () => {
+      const mindar = scene.systems['mindar-image-system'];
+      if (mindar) {
+        mindar.start();
+      } else {
+        setTimeout(tryStart, 200);
+      }
+    };
+
+    if (scene.hasLoaded) {
+      tryStart();
+    } else {
+      scene.addEventListener('loaded', tryStart, { once: true });
+    }
 
     showToast('📷 กล้องเปิดแล้ว — ชี้ที่รูป "ถูกปาก คนไทย"');
   });
