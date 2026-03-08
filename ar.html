@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <title>Hyeen & Ptong — AR Experience</title>
 
-  <!-- MindAR + A-Frame -->
-  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <!-- A-Frame ต้องโหลดก่อน MindAR เสมอ -->
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
@@ -111,10 +110,10 @@
     #toast{position:fixed;top:76px;left:50%;transform:translateX(-50%) translateY(-16px);background:rgba(10,0,14,.92);backdrop-filter:blur(16px);border:1px solid rgba(255,110,199,.3);border-radius:30px;padding:10px 20px;font-size:13px;color:#fff;opacity:0;transition:opacity .3s,transform .3s;z-index:5000;pointer-events:none;white-space:nowrap}
     #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-    /* MindAR canvas */
+    /* MindAR — เต็มจอ ไม่มีดำ */
     .mindar-ui-overlay{z-index:1!important}
-    #mindar-container{position:fixed;inset:0;z-index:1}
-    #mindar-container canvas{width:100%!important;height:100%!important}
+    a-scene{position:fixed!important;top:0!important;left:0!important;width:100vw!important;height:100vh!important}
+    canvas{display:block}
   </style>
 </head>
 <body>
@@ -249,19 +248,19 @@
 <!-- TOAST -->
 <div id="toast"></div>
 
+
 <!-- ════════════════════════════════════════════
      MindAR + A-Frame Scene
-     url: ชี้ไปที่ไฟล์ marker.mind
 ════════════════════════════════════════════ -->
 <a-scene
   mindar-image="imageTargetSrc: markers/targets.mind; autoStart: false; uiLoading: no; uiError: no; uiScanning: no;"
   color-space="sRGB"
   embedded
-  renderer="colorManagement: true, physicallyCorrectLights"
+  renderer="colorManagement: true; physicallyCorrectLights: true;"
   vr-mode-ui="enabled: false"
   device-orientation-permission-ui="enabled: false"
   id="ar-scene"
-  style="display:none;">
+  style="display:none; width:100vw; height:100vh; position:fixed; top:0; left:0; z-index:2;">
 
   <a-assets>
     <video id="ar-video" src="hyeen_and_ptong.mp4" preload="auto" playsinline webkit-playsinline crossorigin="anonymous"></video>
@@ -269,13 +268,32 @@
 
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-  <!-- target index="0" ตรงกับรูปแรกที่ใช้สร้าง .mind file -->
   <a-entity mindar-image-target="targetIndex: 0" id="hiro-marker">
-    <a-video src="#ar-video" width="10" height="10.65" position="0 0 0" rotation="-50 0 0" material="side: double; shader: flat"></a-video>
-    <a-plane width="1.06" height="0.7" position="0 0 -0.005" rotation="0 0 0" material="color: #ff6ec7; opacity: 0.15; side: double; shader: flat"></a-plane>
-    <a-text value="Hyeen & Ptong" align="center" color="#ffffff" width="1.5" position="0 0.45 0" rotation="0 0 0" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
-    <a-text value="Fashion Collection" align="center" color="#ff6ec7" width="1" position="0 0.36 0" rotation="0 0 0"></a-text>
-    <a-text value="฿100,000" align="center" color="#b44fff" width="0.8" position="0 -0.45 0" rotation="0 0 0" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
+    <!-- วิดีโอ width=1 height=0.5625 = อัตราส่วน 16:9 พอดีกับมาร์กเกอร์ -->
+    <a-video src="#ar-video"
+      width="1" height="0.5625"
+      position="0 0 0.001"
+      rotation="0 0 0"
+      material="side: double; shader: flat">
+    </a-video>
+    <!-- กรอบ -->
+    <a-plane width="1.04" height="0.6"
+      position="0 0 0"
+      material="color: #ff6ec7; opacity: 0.15; side: double; shader: flat">
+    </a-plane>
+    <!-- ชื่อ -->
+    <a-text value="Hyeen & Ptong" align="center" color="#ffffff"
+      width="1.4" position="0 0.42 0"
+      font="https://cdn.aframe.io/fonts/Exo2Bold.fnt">
+    </a-text>
+    <a-text value="Fashion Collection" align="center" color="#ff6ec7"
+      width="1" position="0 0.33 0">
+    </a-text>
+    <!-- ราคา -->
+    <a-text value="฿100,000" align="center" color="#b44fff"
+      width="0.8" position="0 -0.38 0"
+      font="https://cdn.aframe.io/fonts/Exo2Bold.fnt">
+    </a-text>
   </a-entity>
 
 </a-scene>
