@@ -277,41 +277,120 @@
     </video>
   </a-assets>
 
-  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+  <a-camera position="0 0 0" look-controls="enabled: false">
+    <a-cursor
+      fuse="false"
+      raycaster="objects: [cursor-listener]"
+      material="color: #ff6ec7; shader: flat; opacity: 0.7;"
+      geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.015;">
+    </a-cursor>
+  </a-camera>
 
   <a-entity mindar-image-target="targetIndex: 0" id="hiro-marker">
 
-    <!-- วิดีโอ — ใช้ a-plane + material แทน a-video เพื่อความเสถียรบน iOS -->
-    <a-plane
-      width="1" height="0.5625"
-      position="0 0 0.001"
-      rotation="0 0 0"
-      material="src: #ar-video; shader: flat; side: double;">
-    </a-plane>
-
-    <!-- กรอบเรืองแสง -->
-    <a-plane
-      width="1.06" height="0.62"
-      position="0 0 -0.001"
-      material="color: #ff6ec7; opacity: 0.2; shader: flat; side: double;">
-    </a-plane>
-
-    <!-- ชื่อแบรนด์ -->
+    <!-- ── ชื่อแบรนด์ด้านบน ── -->
     <a-text value="Hyeen & Ptong"
       align="center" color="#ffffff"
-      width="1.4" position="0 0.42 0.001"
+      width="1.4" position="0 0.42 0.002"
       font="https://cdn.aframe.io/fonts/Exo2Bold.fnt">
     </a-text>
     <a-text value="Fashion Collection"
       align="center" color="#ff6ec7"
-      width="1" position="0 0.34 0.001">
+      width="1" position="0 0.34 0.002">
     </a-text>
 
-    <!-- ราคา -->
+    <!-- ── วิดีโอ ── -->
+    <a-plane
+      width="1" height="0.5625"
+      position="0 0 0.001"
+      material="src: #ar-video; shader: flat; side: double;">
+    </a-plane>
+    <!-- กรอบ glow -->
+    <a-plane
+      width="1.04" height="0.60"
+      position="0 0 0"
+      material="color: #ff6ec7; opacity: 0.2; shader: flat; side: double;">
+    </a-plane>
+
+    <!-- ── ราคา ── -->
     <a-text value="฿100,000"
       align="center" color="#b44fff"
-      width="0.9" position="0 -0.38 0.001"
+      width="0.9" position="0 -0.36 0.002"
       font="https://cdn.aframe.io/fonts/Exo2Bold.fnt">
+    </a-text>
+
+    <!-- ══════════════════════════════════════
+         ปุ่ม AR ติดอยู่กับ marker
+    ══════════════════════════════════════ -->
+
+    <!-- แถบปุ่มพื้นหลัง -->
+    <a-plane
+      width="1.04" height="0.18"
+      position="0 -0.47 0.002"
+      material="color: #0a0008; opacity: 0.82; shader: flat;">
+    </a-plane>
+
+    <!-- ปุ่ม ◀◀ Rewind -->
+    <a-entity position="-0.38 -0.47 0.003" id="ar-btn-rewind"
+      cursor-listener>
+      <a-circle radius="0.07"
+        material="color: #1a001a; opacity: 0.9; shader: flat;">
+      </a-circle>
+      <a-text value="◀◀" align="center" color="#fff"
+        width="0.3" position="0 -0.01 0.001">
+      </a-text>
+    </a-entity>
+
+    <!-- ปุ่ม ▶/⏸ Play/Pause -->
+    <a-entity position="-0.19 -0.47 0.003" id="ar-btn-play"
+      cursor-listener>
+      <a-circle radius="0.07"
+        material="color: #ff6ec7; opacity: 0.95; shader: flat;"
+        id="ar-play-bg">
+      </a-circle>
+      <a-text value="▶" align="center" color="#fff"
+        width="0.28" position="0 -0.01 0.001"
+        id="ar-play-icon">
+      </a-text>
+    </a-entity>
+
+    <!-- ปุ่ม ⏹ Stop -->
+    <a-entity position="0 -0.47 0.003" id="ar-btn-stop"
+      cursor-listener>
+      <a-circle radius="0.07"
+        material="color: #1a001a; opacity: 0.9; shader: flat;">
+      </a-circle>
+      <a-text value="⏹" align="center" color="#fff"
+        width="0.28" position="0 -0.01 0.001">
+      </a-text>
+    </a-entity>
+
+    <!-- ปุ่ม ดูหน้าอื่น -->
+    <a-entity position="0.19 -0.47 0.003" id="ar-btn-info"
+      cursor-listener>
+      <a-circle radius="0.07"
+        material="color: #1a001a; opacity: 0.9; shader: flat;">
+      </a-circle>
+      <a-text value="ℹ" align="center" color="#ff6ec7"
+        width="0.28" position="0 -0.01 0.001">
+      </a-text>
+    </a-entity>
+
+    <!-- ปุ่ม ดูสินค้าตัวอื่น / Order -->
+    <a-entity position="0.38 -0.47 0.003" id="ar-btn-order"
+      cursor-listener>
+      <a-circle radius="0.07"
+        material="color: #b44fff; opacity: 0.95; shader: flat;">
+      </a-circle>
+      <a-text value="🛍" align="center" color="#fff"
+        width="0.28" position="0 -0.01 0.001">
+      </a-text>
+    </a-entity>
+
+    <!-- label ใต้ปุ่ม -->
+    <a-text value="ย้อน   เล่น   หยุด   ข้อมูล   สั่งซื้อ"
+      align="center" color="rgba(255,255,255,0.45)"
+      width="1.1" position="0 -0.57 0.002">
     </a-text>
 
   </a-entity>
@@ -319,6 +398,20 @@
 </a-scene>
 
 <script>
+  // ── Register cursor-listener component for AR buttons ──
+  AFRAME.registerComponent('cursor-listener', {
+    init: function () {
+      this.el.addEventListener('click', () => {
+        const id = this.el.id;
+        if (id === 'ar-btn-play')   handleARPlay();
+        if (id === 'ar-btn-stop')   handleARStop();
+        if (id === 'ar-btn-rewind') handleARRewind();
+        if (id === 'ar-btn-info')   document.getElementById('info-modal').classList.add('open');
+        if (id === 'ar-btn-order')  document.getElementById('order-modal').classList.add('open');
+      });
+    }
+  });
+
   let isPlaying=false, markerFound=false, selectedSize='M';
   const video=document.getElementById('ar-video');
   const btnPlay=document.getElementById('btn-play');
@@ -331,13 +424,43 @@
   function showToast(msg,ms=2500){toast.textContent=msg;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),ms)}
   function selectSize(el){document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');selectedSize=el.textContent}
 
+  // ── AR Button Handlers ──────────────────────────────
+  function setPlayIcon(playing) {
+    isPlaying = playing;
+    // อัปเดตปุ่ม HTML ด้านล่าง
+    btnPlay.textContent = playing ? '⏸' : '▶';
+    // อัปเดต icon ใน AR
+    const arIcon = document.getElementById('ar-play-icon');
+    if (arIcon) arIcon.setAttribute('value', playing ? '⏸' : '▶');
+  }
+
+  function handleARPlay() {
+    if (isPlaying) {
+      video.pause(); setPlayIcon(false); showToast('⏸ หยุดชั่วคราว');
+    } else {
+      video.play().then(() => { setPlayIcon(true); showToast('▶ กำลังเล่น'); }).catch(()=>{});
+    }
+  }
+
+  function handleARStop() {
+    video.pause();
+    video.currentTime = 0;
+    setPlayIcon(false);
+    showToast('⏹ หยุดวิดีโอ');
+  }
+
+  function handleARRewind() {
+    video.currentTime = Math.max(0, video.currentTime - 10);
+    showToast('◀◀ ย้อนกลับ 10 วิ');
+  }
+
   // วิดีโอเล่นจบ → โชว์ปุ่ม Order
   video.addEventListener('ended',()=>{
     document.getElementById('btn-order').classList.add('revealed');
     badge.style.display='block';
     setTimeout(()=>{badge.style.display='none'},4000);
     showToast('🎬 วิดีโอจบแล้ว!');
-    isPlaying=false; btnPlay.textContent='▶';
+    setPlayIcon(false);
   });
 
   // ── Splash → Start ──────────────────────────────
