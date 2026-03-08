@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <title>Hyeen & Ptong — AR Experience</title>
 
+  <!-- MindAR + A-Frame -->
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap');
@@ -21,8 +23,8 @@
     .splash-logo span{display:block;font-size:16px;font-weight:400;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:4px;font-family:'DM Sans',sans-serif}
     .splash-div{width:40px;height:1px;background:linear-gradient(90deg,transparent,rgba(255,110,199,.6),transparent)}
     .splash-desc{font-size:14px;color:rgba(255,255,255,.45);text-align:center;max-width:260px;line-height:1.7}
-    .marker-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,110,199,.2);border-radius:16px;padding:14px 20px;display:flex;align-items:center;gap:14px}
-    .marker-box img{width:44px;height:44px;border-radius:8px}
+    .marker-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,110,199,.2);border-radius:16px;padding:14px 20px;display:flex;align-items:center;gap:14px;max-width:300px}
+    .marker-box img{width:60px;height:60px;border-radius:8px;object-fit:cover;border:1px solid rgba(255,110,199,.3)}
     .marker-box-txt{font-size:12px;color:rgba(255,255,255,.5);line-height:1.5}
     .marker-box-txt strong{color:#fff;display:block;margin-bottom:2px}
     .splash-btn{padding:15px 44px;background:linear-gradient(135deg,#ff6ec7,#b44fff);border:none;border-radius:50px;color:#fff;font-size:15px;cursor:pointer;box-shadow:0 8px 32px rgba(180,79,255,.4);transition:transform .2s}
@@ -54,12 +56,8 @@
     .btn-sec{flex:1;height:50px;background:rgba(255,255,255,.07);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.12);border-radius:14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s,transform .15s}
     .btn-sec:active{transform:scale(.95)}
     .btn-sec.accent{background:linear-gradient(135deg,rgba(255,110,199,.2),rgba(180,79,255,.2));border-color:rgba(255,110,199,.35)}
-
-    /* Order button — ซ่อนจนกว่าวิดีโอจะจบ */
     #btn-order{opacity:0;pointer-events:none;transform:translateY(12px) scale(0.92);transition:opacity .5s ease,transform .5s cubic-bezier(.34,1.56,.64,1)}
     #btn-order.revealed{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
-
-    /* badge แจ้งเตือนเมื่อวิดีโอจบ */
     #video-end-badge{display:none;position:fixed;top:72px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#ff6ec7,#b44fff);border-radius:30px;padding:8px 22px;font-size:12px;color:#fff;font-weight:500;letter-spacing:.3px;box-shadow:0 4px 20px rgba(180,79,255,.45);z-index:300;white-space:nowrap;animation:badgePop .5s cubic-bezier(.34,1.56,.64,1) both}
     @keyframes badgePop{from{opacity:0;transform:translateX(-50%) scale(.8)}to{opacity:1;transform:translateX(-50%) scale(1)}}
 
@@ -113,7 +111,10 @@
     #toast{position:fixed;top:76px;left:50%;transform:translateX(-50%) translateY(-16px);background:rgba(10,0,14,.92);backdrop-filter:blur(16px);border:1px solid rgba(255,110,199,.3);border-radius:30px;padding:10px 20px;font-size:13px;color:#fff;opacity:0;transition:opacity .3s,transform .3s;z-index:5000;pointer-events:none;white-space:nowrap}
     #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-    a-scene{position:fixed;inset:0}
+    /* MindAR canvas */
+    .mindar-ui-overlay{z-index:1!important}
+    #mindar-container{position:fixed;inset:0;z-index:1}
+    #mindar-container canvas{width:100%!important;height:100%!important}
   </style>
 </head>
 <body>
@@ -123,10 +124,13 @@
   <div class="splash-badge">AR Fashion Experience</div>
   <div class="splash-logo">Hyeen & Ptong<span>Collection</span></div>
   <div class="splash-div"></div>
-  <p class="splash-desc">Point your camera at the Hiro marker to experience the collection in augmented reality.</p>
+  <p class="splash-desc">ชี้กล้องไปที่รูป "ถูกปาก คนไทย" เพื่อดู AR collection</p>
   <div class="marker-box">
-    <img src="marker.png" alt="Custom marker" style="filter:none;background:#fff;"/>
-    <div class="marker-box-txt"><strong>ถูกปาก คนไทย</strong>ใช้รูปนี้เป็น marker</div>
+    <img src="marker.png" alt="marker" onerror="this.style.display='none'"/>
+    <div class="marker-box-txt">
+      <strong>ถูกปาก คนไทย</strong>
+      ใช้รูปนี้เป็น AR marker
+    </div>
   </div>
   <button class="splash-btn" id="start-btn">✦ Launch AR Experience</button>
 </div>
@@ -163,7 +167,7 @@
   </div>
 </div>
 
-<!-- BADGE เมื่อวิดีโอจบ -->
+<!-- badge วิดีโอจบ -->
 <div id="video-end-badge">🛍 วิดีโอจบแล้ว — กด Order Now ได้เลย!</div>
 
 <!-- ORDER MODAL -->
@@ -178,19 +182,19 @@
       <div class="sheet-price">฿100,000</div>
     </div>
     <div class="form-group">
-      <label class="form-label">Full Name</label>
-      <input class="form-input" type="text" placeholder="Your full name" id="f-name"/>
+      <label class="form-label">ชื่อ-นามสกุล</label>
+      <input class="form-input" type="text" placeholder="ชื่อเต็มของคุณ" id="f-name"/>
     </div>
     <div class="form-group">
-      <label class="form-label">Phone Number</label>
+      <label class="form-label">เบอร์โทรศัพท์</label>
       <input class="form-input" type="tel" placeholder="08X-XXX-XXXX" id="f-phone"/>
     </div>
     <div class="form-group">
-      <label class="form-label">Delivery Address</label>
-      <input class="form-input" type="text" placeholder="Street, district, province" id="f-address"/>
+      <label class="form-label">ที่อยู่จัดส่ง</label>
+      <input class="form-input" type="text" placeholder="บ้านเลขที่ ถนน อำเภอ จังหวัด" id="f-address"/>
     </div>
     <div class="form-group">
-      <label class="form-label">Size</label>
+      <label class="form-label">ไซส์</label>
       <div class="size-grid">
         <div class="size-btn" onclick="selectSize(this)">XS</div>
         <div class="size-btn" onclick="selectSize(this)">S</div>
@@ -200,20 +204,20 @@
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">Payment Method</label>
+      <label class="form-label">ช่องทางชำระเงิน</label>
       <select class="form-select" id="f-payment">
         <option>PromptPay / QR Code</option>
-        <option>Bank Transfer</option>
-        <option>Cash on Delivery</option>
-        <option>Credit / Debit Card</option>
+        <option>โอนเงินผ่านธนาคาร</option>
+        <option>เก็บเงินปลายทาง</option>
+        <option>บัตรเครดิต / เดบิต</option>
       </select>
     </div>
     <div class="order-summary">
-      <div class="order-summary-lbl">Total Amount</div>
+      <div class="order-summary-lbl">ยอดรวมทั้งหมด</div>
       <div class="order-summary-val">฿100,000</div>
     </div>
-    <button class="btn-confirm" onclick="submitOrder()">✦ Confirm Order</button>
-    <button class="btn-cancel" id="order-close-btn">Cancel</button>
+    <button class="btn-confirm" onclick="submitOrder()">✦ ยืนยันคำสั่งซื้อ</button>
+    <button class="btn-cancel" id="order-close-btn">ยกเลิก</button>
   </div>
 </div>
 
@@ -221,58 +225,59 @@
 <div id="info-modal">
   <div class="info-sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">About This Collection</div>
+    <div class="sheet-title">เกี่ยวกับ Collection นี้</div>
     <div class="info-grid">
-      <div class="info-card"><div class="info-card-lbl">Price</div><div class="info-card-val pink">฿100,000</div></div>
-      <div class="info-card"><div class="info-card-lbl">Category</div><div class="info-card-val" style="font-size:14px;padding-top:4px">Fashion</div></div>
+      <div class="info-card"><div class="info-card-lbl">ราคา</div><div class="info-card-val pink">฿100,000</div></div>
+      <div class="info-card"><div class="info-card-lbl">ประเภท</div><div class="info-card-val" style="font-size:14px;padding-top:4px">Fashion</div></div>
       <div class="info-card"><div class="info-card-lbl">Edition</div><div class="info-card-val" style="font-size:14px;padding-top:4px">AR Limited</div></div>
-      <div class="info-card"><div class="info-card-lbl">Ships</div><div class="info-card-val" style="font-size:14px;padding-top:4px">Thailand 🇹🇭</div></div>
+      <div class="info-card"><div class="info-card-lbl">จัดส่ง</div><div class="info-card-val" style="font-size:14px;padding-top:4px">ทั่วไทย 🇹🇭</div></div>
     </div>
-    <p class="info-desc">The Hyeen & Ptong Collection is an exclusive AR fashion line blending bold design with cutting-edge technology. Each piece is handcrafted and limited edition — made for those who wear the future.</p>
-    <button class="btn-confirm" onclick="document.getElementById('info-modal').classList.remove('open');document.getElementById('order-modal').classList.add('open')">🛍 Order Now</button>
-    <button class="btn-cancel" id="info-close-btn">Close</button>
+    <p class="info-desc">Hyeen & Ptong Collection เป็น exclusive AR fashion line ผสมผสานดีไซน์โดดเด่นกับเทคโนโลยีล้ำสมัย แต่ละชิ้นทำด้วยมือและมีจำนวนจำกัด</p>
+    <button class="btn-confirm" onclick="document.getElementById('info-modal').classList.remove('open');document.getElementById('order-modal').classList.add('open')">🛍 สั่งซื้อเลย</button>
+    <button class="btn-cancel" id="info-close-btn">ปิด</button>
   </div>
 </div>
 
 <!-- SUCCESS -->
 <div id="success-overlay">
   <div class="success-icon">✓</div>
-  <div class="success-title">Order Placed!</div>
-  <p class="success-sub">Thank you! We'll contact you shortly to confirm your order.</p>
-  <button class="success-back" onclick="document.getElementById('success-overlay').classList.remove('show')">← Back to AR</button>
+  <div class="success-title">สั่งซื้อสำเร็จ!</div>
+  <p class="success-sub">ขอบคุณครับ! เราจะติดต่อกลับเพื่อยืนยันคำสั่งซื้อของคุณ</p>
+  <button class="success-back" onclick="document.getElementById('success-overlay').classList.remove('show')">← กลับสู่ AR</button>
 </div>
 
 <!-- TOAST -->
 <div id="toast"></div>
 
-<!-- A-FRAME AR SCENE — NFT Image Tracking -->
+<!-- ════════════════════════════════════════════
+     MindAR + A-Frame Scene
+     url: ชี้ไปที่ไฟล์ marker.mind
+════════════════════════════════════════════ -->
 <a-scene
+  mindar-image="imageTargetSrc: markers/targets.mind; autoStart: false; uiLoading: no; uiError: no; uiScanning: no;"
+  color-space="sRGB"
   embedded
-  arjs="sourceType: webcam; debugUIEnabled: false;"
+  renderer="colorManagement: true, physicallyCorrectLights"
   vr-mode-ui="enabled: false"
-  renderer="logarithmicDepthBuffer: true; antialias: true;"
+  device-orientation-permission-ui="enabled: false"
   id="ar-scene"
   style="display:none;">
+
   <a-assets>
     <video id="ar-video" src="hyeen_and_ptong.mp4" preload="auto" playsinline webkit-playsinline crossorigin="anonymous"></video>
   </a-assets>
-  <a-nft
-    type="nft"
-    url="markers/thuukpaak"
-    smooth="true"
-    smoothCount="10"
-    smoothTolerance="0.01"
-    smoothThreshold="5"
-    id="hiro-marker">
-    <a-video id="ar-video-plane" src="#ar-video" width="2.2" height="1.4" position="0 1.5 0" rotation="0 0 0" material="side: double; shader: flat"></a-video>
-    <a-plane width="2.35" height="1.5" position="0 1.5 -0.01" rotation="0 0 0" material="color: #ff6ec7; opacity: 0.12; side: double; shader: flat"></a-plane>
-    <a-text value="Hyeen & Ptong" align="center" color="#ffffff" width="3.2" position="0 2.55 0" rotation="0 0 0" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
-    <a-text value="Fashion Collection  ·  AR Edition" align="center" color="#ff6ec7" width="2.2" position="0 2.3 0" rotation="0 0 0"></a-text>
-    <a-text value="฿100,000" align="center" color="#b44fff" width="1.8" position="0 0.6 0" rotation="0 0 0" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
-    <a-ring radius-inner="1.3" radius-outer="1.42" rotation="-90 0 0" position="0 0.02 0" material="color: #ff6ec7; opacity: 0.3; side: double; shader: flat"></a-ring>
-    <a-circle radius="1.3" rotation="-90 0 0" position="0 0.01 0" material="color: #ff6ec7; opacity: 0.06; side: double; shader: flat"></a-circle>
-  </a-nft>
-  <a-entity camera></a-entity>
+
+  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+  <!-- target index="0" ตรงกับรูปแรกที่ใช้สร้าง .mind file -->
+  <a-entity mindar-image-target="targetIndex: 0" id="hiro-marker">
+    <a-video src="#ar-video" width="1" height="0.65" position="0 0 0" rotation="0 0 0" material="side: double; shader: flat"></a-video>
+    <a-plane width="1.06" height="0.7" position="0 0 -0.005" rotation="0 0 0" material="color: #ff6ec7; opacity: 0.15; side: double; shader: flat"></a-plane>
+    <a-text value="Hyeen & Ptong" align="center" color="#ffffff" width="1.5" position="0 0.45 0" rotation="0 0 0" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
+    <a-text value="Fashion Collection" align="center" color="#ff6ec7" width="1" position="0 0.36 0" rotation="0 0 0"></a-text>
+    <a-text value="฿100,000" align="center" color="#b44fff" width="0.8" position="0 -0.45 0" rotation="0 0 0" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
+  </a-entity>
+
 </a-scene>
 
 <script>
@@ -283,63 +288,76 @@
   const scanWrap=document.getElementById('scan-wrap');
   const statusText=document.getElementById('status-text');
   const toast=document.getElementById('toast');
+  const badge=document.getElementById('video-end-badge');
 
   function showToast(msg,ms=2500){toast.textContent=msg;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),ms)}
   function selectSize(el){document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');selectedSize=el.textContent}
 
-  // เมื่อวิดีโอเล่นจบ — โชว์ปุ่ม Order Now
-  const badge = document.getElementById('video-end-badge');
-  video.addEventListener('ended', () => {
-    // โชว์ปุ่ม Order Now
+  // วิดีโอเล่นจบ → โชว์ปุ่ม Order
+  video.addEventListener('ended',()=>{
     document.getElementById('btn-order').classList.add('revealed');
-    // โชว์ badge แจ้งเตือน
-    badge.style.display = 'block';
-    // ซ่อน badge หลัง 4 วินาที
-    setTimeout(() => { badge.style.display = 'none'; }, 4000);
+    badge.style.display='block';
+    setTimeout(()=>{badge.style.display='none'},4000);
     showToast('🎬 วิดีโอจบแล้ว!');
-    isPlaying = false;
-    btnPlay.textContent = '▶';
+    isPlaying=false; btnPlay.textContent='▶';
   });
 
+  // ── Splash → Start ──────────────────────────────
   document.getElementById('start-btn').addEventListener('click',()=>{
     document.getElementById('splash').classList.add('hidden');
-    document.getElementById('ar-scene').style.display='block';
-    showToast('📷 Camera active — point at the Hiro marker');
+    const scene=document.getElementById('ar-scene');
+    scene.style.display='block';
+
+    // Start MindAR after scene is visible
+    scene.addEventListener('loaded',()=>{
+      const mindar=scene.systems['mindar-image-system'];
+      if(mindar) mindar.start();
+    },{once:true});
+
+    showToast('📷 กล้องเปิดแล้ว — ชี้ที่รูป "ถูกปาก คนไทย"');
   });
 
-  const marker=document.getElementById('hiro-marker');
-  marker.addEventListener('markerFound',()=>{
-    if(markerFound)return; markerFound=true;
-    statusText.textContent='Marker found ✓';
+  // ── MindAR target found/lost ─────────────────────
+  document.querySelector('[mindar-image-target]').addEventListener('targetFound',()=>{
+    if(markerFound) return;
+    markerFound=true;
+    statusText.textContent='พบ marker ✓';
     scanWrap.classList.add('hidden');
     controlPanel.classList.add('visible');
-    showToast('✦ Collection loaded in AR!');
+    showToast('✦ Collection โหลดแล้ว!');
     video.play().then(()=>{isPlaying=true;btnPlay.textContent='⏸'}).catch(()=>{});
   });
-  marker.addEventListener('markerLost',()=>{
-    markerFound=false; statusText.textContent='Scanning…';
-    scanWrap.classList.remove('hidden'); controlPanel.classList.remove('visible');
+
+  document.querySelector('[mindar-image-target]').addEventListener('targetLost',()=>{
+    markerFound=false;
+    statusText.textContent='Scanning…';
+    scanWrap.classList.remove('hidden');
+    controlPanel.classList.remove('visible');
     video.pause(); isPlaying=false; btnPlay.textContent='▶';
   });
 
+  // ── Play / Pause ──────────────────────────────────
   btnPlay.addEventListener('click',()=>{
-    if(isPlaying){video.pause();isPlaying=false;btnPlay.textContent='▶';showToast('⏸ Paused')}
-    else{video.play().then(()=>{isPlaying=true;btnPlay.textContent='⏸';showToast('▶ Playing')}).catch(()=>showToast('Tap marker area first'))}
+    if(isPlaying){video.pause();isPlaying=false;btnPlay.textContent='▶';showToast('⏸ หยุดชั่วคราว')}
+    else{video.play().then(()=>{isPlaying=true;btnPlay.textContent='⏸';showToast('▶ กำลังเล่น')}).catch(()=>showToast('แตะ marker ก่อนนะครับ'))}
   });
 
+  // ── Order modal ───────────────────────────────────
   document.getElementById('btn-order').addEventListener('click',()=>document.getElementById('order-modal').classList.add('open'));
   document.getElementById('order-close-btn').addEventListener('click',()=>document.getElementById('order-modal').classList.remove('open'));
   document.getElementById('order-modal').addEventListener('click',e=>{if(e.target===document.getElementById('order-modal'))document.getElementById('order-modal').classList.remove('open')});
 
+  // ── Info modal ────────────────────────────────────
   document.getElementById('btn-info').addEventListener('click',()=>document.getElementById('info-modal').classList.add('open'));
   document.getElementById('info-close-btn').addEventListener('click',()=>document.getElementById('info-modal').classList.remove('open'));
   document.getElementById('info-modal').addEventListener('click',e=>{if(e.target===document.getElementById('info-modal'))document.getElementById('info-modal').classList.remove('open')});
 
+  // ── Submit order ──────────────────────────────────
   function submitOrder(){
     const name=document.getElementById('f-name').value.trim();
     const phone=document.getElementById('f-phone').value.trim();
     const address=document.getElementById('f-address').value.trim();
-    if(!name||!phone||!address){showToast('⚠ Please fill in all fields');return}
+    if(!name||!phone||!address){showToast('⚠ กรุณากรอกข้อมูลให้ครบ');return}
     document.getElementById('order-modal').classList.remove('open');
     setTimeout(()=>document.getElementById('success-overlay').classList.add('show'),300);
   }
