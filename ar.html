@@ -3,126 +3,17 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <title>Hyeen & Ptong — AR Experience</title>
-
-  <!-- A-Frame ต้องโหลดก่อน MindAR เสมอ -->
+  <title>Hyeen & Ptong — AR</title>
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap');
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'DM Sans',sans-serif;background:#000;overflow:hidden}
-
-    /* SPLASH */
-    #splash{position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#0a0008,#1a0015 50%,#0a000f);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:30px;transition:opacity .7s,visibility .7s}
-    #splash.hidden{opacity:0;visibility:hidden;pointer-events:none}
-    .splash-badge{background:linear-gradient(135deg,#ff6ec7,#b44fff);border-radius:50px;padding:6px 18px;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#fff}
-    .splash-logo{font-family:'Playfair Display',serif;font-size:42px;font-weight:900;color:#fff;text-align:center;line-height:1.1;letter-spacing:-1px}
-    .splash-logo span{display:block;font-size:16px;font-weight:400;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:4px;font-family:'DM Sans',sans-serif}
-    .splash-div{width:40px;height:1px;background:linear-gradient(90deg,transparent,rgba(255,110,199,.6),transparent)}
-    .splash-desc{font-size:14px;color:rgba(255,255,255,.45);text-align:center;max-width:260px;line-height:1.7}
-    .marker-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,110,199,.2);border-radius:16px;padding:14px 20px;display:flex;align-items:center;gap:14px;max-width:300px}
-    .marker-box img{width:60px;height:60px;border-radius:8px;object-fit:cover;border:1px solid rgba(255,110,199,.3)}
-    .marker-box-txt{font-size:12px;color:rgba(255,255,255,.5);line-height:1.5}
-    .marker-box-txt strong{color:#fff;display:block;margin-bottom:2px}
-    .splash-btn{padding:15px 44px;background:linear-gradient(135deg,#ff6ec7,#b44fff);border:none;border-radius:50px;color:#fff;font-size:15px;cursor:pointer;box-shadow:0 8px 32px rgba(180,79,255,.4);transition:transform .2s}
-    .splash-btn:active{transform:scale(.96)}
-
-    /* HUD */
-    #hud{position:fixed;inset:0;pointer-events:none;z-index:100}
-    .hud-top{position:absolute;top:0;left:0;right:0;padding:18px 20px 14px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to bottom,rgba(0,0,0,.75),transparent)}
-    .hud-brand{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:#fff}
-    .hud-brand sub{font-family:'DM Sans',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.35);vertical-align:bottom;margin-left:2px}
-    .hud-pill{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:5px 12px;font-size:11px;color:rgba(255,255,255,.65)}
-    .live-dot{width:6px;height:6px;border-radius:50%;background:#ff6ec7;animation:blink 1.4s ease-in-out infinite}
-    @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-    #scan-wrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);display:flex;flex-direction:column;align-items:center;gap:14px;transition:opacity .4s}
-    #scan-wrap.hidden{opacity:0;pointer-events:none}
-    .scan-svg{width:210px;height:210px;animation:spin 10s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .scan-text{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.35)}
-
-    /* CONTROL PANEL */
-    #control-panel{position:fixed;bottom:0;left:0;right:0;z-index:200;padding:14px 18px 36px;background:linear-gradient(to top,rgba(5,0,10,.92) 65%,transparent);transform:translateY(110%);transition:transform .55s cubic-bezier(.34,1.56,.64,1)}
-    #control-panel.visible{transform:translateY(0)}
-    .panel-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-    .panel-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#fff}
-    .panel-price{font-size:14px;color:#ff6ec7;font-weight:500}
-    .btn-row{display:flex;gap:10px;align-items:center}
-    #btn-play{width:56px;height:56px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#ff6ec7,#b44fff);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;box-shadow:0 4px 20px rgba(180,79,255,.5);transition:transform .15s}
-    #btn-play:active{transform:scale(.9)}
-    .btn-sec{flex:1;height:50px;background:rgba(255,255,255,.07);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.12);border-radius:14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s,transform .15s}
-    .btn-sec:active{transform:scale(.95)}
-    .btn-sec.accent{background:linear-gradient(135deg,rgba(255,110,199,.2),rgba(180,79,255,.2));border-color:rgba(255,110,199,.35)}
-    #btn-order{opacity:0;pointer-events:none;transform:translateY(12px) scale(0.92);transition:opacity .5s ease,transform .5s cubic-bezier(.34,1.56,.64,1)}
-    #btn-order.revealed{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
-    #video-end-badge{display:none;position:fixed;top:72px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#ff6ec7,#b44fff);border-radius:30px;padding:8px 22px;font-size:12px;color:#fff;font-weight:500;letter-spacing:.3px;box-shadow:0 4px 20px rgba(180,79,255,.45);z-index:300;white-space:nowrap;animation:badgePop .5s cubic-bezier(.34,1.56,.64,1) both}
-    @keyframes badgePop{from{opacity:0;transform:translateX(-50%) scale(.8)}to{opacity:1;transform:translateX(-50%) scale(1)}}
-
-    /* ORDER MODAL */
-    #order-modal{position:fixed;inset:0;z-index:1000;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);opacity:0;visibility:hidden;transition:opacity .35s,visibility .35s}
-    #order-modal.open{opacity:1;visibility:visible}
-    .order-sheet{width:100%;max-width:480px;background:#0f0009;border:1px solid rgba(255,110,199,.15);border-top-left-radius:28px;border-top-right-radius:28px;padding:24px 22px 44px;transform:translateY(100%);transition:transform .45s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto}
-    #order-modal.open .order-sheet{transform:translateY(0)}
-    .sheet-handle{width:38px;height:4px;border-radius:2px;background:rgba(255,255,255,.15);margin:0 auto 22px}
-    .sheet-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
-    .sheet-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#fff}
-    .sheet-price{font-size:20px;font-weight:700;background:linear-gradient(135deg,#ff6ec7,#b44fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .form-group{margin-bottom:14px}
-    .form-label{display:block;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:7px}
-    .form-input,.form-select{width:100%;padding:13px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
-    .form-input:focus,.form-select:focus{border-color:rgba(255,110,199,.5);background:rgba(255,110,199,.05)}
-    .form-input::placeholder{color:rgba(255,255,255,.2)}
-    .form-select option{background:#1a0015}
-    .size-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-    .size-btn{padding:10px 0;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6);font-size:13px;cursor:pointer;text-align:center;transition:all .2s}
-    .size-btn.active,.size-btn:hover{background:rgba(255,110,199,.15);border-color:rgba(255,110,199,.5);color:#ff6ec7}
-    .order-summary{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;margin:16px 0;display:flex;justify-content:space-between;align-items:center}
-    .order-summary-lbl{font-size:13px;color:rgba(255,255,255,.5)}
-    .order-summary-val{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#ff6ec7}
-    .btn-confirm{width:100%;padding:16px;background:linear-gradient(135deg,#ff6ec7,#b44fff);border:none;border-radius:14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;box-shadow:0 6px 24px rgba(180,79,255,.4);transition:transform .2s}
-    .btn-confirm:active{transform:scale(.98)}
-    .btn-cancel{width:100%;padding:13px;margin-top:10px;background:transparent;border:1px solid rgba(255,255,255,.1);border-radius:14px;color:rgba(255,255,255,.4);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer}
-
-    /* INFO MODAL */
-    #info-modal{position:fixed;inset:0;z-index:1000;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);opacity:0;visibility:hidden;transition:opacity .35s,visibility .35s}
-    #info-modal.open{opacity:1;visibility:visible}
-    .info-sheet{width:100%;max-width:480px;background:#0f0009;border:1px solid rgba(255,110,199,.15);border-top-left-radius:28px;border-top-right-radius:28px;padding:24px 22px 44px;transform:translateY(100%);transition:transform .45s cubic-bezier(.34,1.56,.64,1)}
-    #info-modal.open .info-sheet{transform:translateY(0)}
-    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}
-    .info-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px}
-    .info-card-lbl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:6px}
-    .info-card-val{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#fff}
-    .info-card-val.pink{color:#ff6ec7}
-    .info-desc{font-size:13px;line-height:1.75;color:rgba(255,255,255,.5);margin-bottom:20px}
-
-    /* SUCCESS */
-    #success-overlay{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.88);backdrop-filter:blur(14px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s}
-    #success-overlay.show{opacity:1;visibility:visible}
-    .success-icon{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#ff6ec7,#b44fff);display:flex;align-items:center;justify-content:center;font-size:32px;animation:pop .5s cubic-bezier(.34,1.56,.64,1) both}
-    @keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
-    .success-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:#fff}
-    .success-sub{font-size:14px;color:rgba(255,255,255,.45);text-align:center;max-width:240px;line-height:1.6}
-    .success-back{margin-top:8px;padding:12px 32px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:50px;color:#fff;font-size:14px;cursor:pointer}
-
-    /* TOAST */
-    #toast{position:fixed;top:76px;left:50%;transform:translateX(-50%) translateY(-16px);background:rgba(10,0,14,.92);backdrop-filter:blur(16px);border:1px solid rgba(255,110,199,.3);border-radius:30px;padding:10px 20px;font-size:13px;color:#fff;opacity:0;transition:opacity .3s,transform .3s;z-index:5000;pointer-events:none;white-space:nowrap}
-    #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-    /* MindAR — เต็มจอ ไม่มีดำ */
-    .mindar-ui-overlay{z-index:1!important}
-    a-scene{position:fixed!important;top:0!important;left:0!important;width:100vw!important;height:100vh!important}
-    canvas{display:block}
-  </style>
+  <link rel="stylesheet" href="css/ar.css"/>
 </head>
 <body>
 
-<!-- SPLASH -->
+<!-- ── Splash ── -->
 <div id="splash">
   <div class="splash-badge">AR Fashion Experience</div>
   <div class="splash-logo">Hyeen & Ptong<span>Collection</span></div>
-  <div class="splash-div"></div>
   <p class="splash-desc">ชี้กล้องไปที่รูป "ถูกปาก คนไทย" เพื่อดู AR collection</p>
   <div class="marker-box">
     <img src="marker.png" alt="marker" onerror="this.style.display='none'"/>
@@ -134,26 +25,29 @@
   <button class="splash-btn" id="start-btn">✦ Launch AR Experience</button>
 </div>
 
-<!-- HUD -->
+<!-- ── HUD ── -->
 <div id="hud">
   <div class="hud-top">
     <div class="hud-brand">Hyeen & Ptong <sub>AR</sub></div>
-    <div class="hud-pill"><div class="live-dot"></div><span id="status-text">Scanning…</span></div>
+    <div class="hud-pill">
+      <div class="live-dot"></div>
+      <span id="status-text">Scanning…</span>
+    </div>
   </div>
   <div id="scan-wrap">
     <svg class="scan-svg" viewBox="0 0 200 200" fill="none">
       <circle cx="100" cy="100" r="88" stroke="rgba(255,110,199,0.12)" stroke-width="1"/>
       <circle cx="100" cy="100" r="88" stroke="rgba(255,110,199,0.65)" stroke-width="1.5" stroke-dasharray="55 500" stroke-linecap="round"/>
-      <path d="M28 52 L28 28 L52 28" stroke="#ff6ec7" stroke-width="2.5" stroke-linecap="round"/>
-      <path d="M148 28 L172 28 L172 52" stroke="#ff6ec7" stroke-width="2.5" stroke-linecap="round"/>
-      <path d="M28 148 L28 172 L52 172" stroke="#ff6ec7" stroke-width="2.5" stroke-linecap="round"/>
-      <path d="M172 148 L172 172 L148 172" stroke="#ff6ec7" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M28 52L28 28L52 28" stroke="#ff6ec7" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M148 28L172 28L172 52" stroke="#ff6ec7" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M28 148L28 172L52 172" stroke="#ff6ec7" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M172 148L172 172L148 172" stroke="#ff6ec7" stroke-width="2.5" stroke-linecap="round"/>
     </svg>
     <div class="scan-text">ชี้กล้องที่รูป "ถูกปาก คนไทย"</div>
   </div>
 </div>
 
-<!-- CONTROL PANEL -->
+<!-- ── Control Panel ── -->
 <div id="control-panel">
   <div class="panel-top">
     <div class="panel-name">Hyeen & Ptong</div>
@@ -166,17 +60,16 @@
   </div>
 </div>
 
-<!-- badge วิดีโอจบ -->
 <div id="video-end-badge">🛍 วิดีโอจบแล้ว — กด Order Now ได้เลย!</div>
 
-<!-- ORDER MODAL -->
-<div id="order-modal">
-  <div class="order-sheet">
+<!-- ── Order Modal ── -->
+<div id="order-modal" class="modal-backdrop">
+  <div class="modal-sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-header">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
       <div>
         <div class="sheet-title">Hyeen & Ptong</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.35);margin-top:3px">Fashion Collection · AR Edition</div>
+        <div class="sheet-sub">Fashion Collection · AR Edition</div>
       </div>
       <div class="sheet-price">฿100,000</div>
     </div>
@@ -220,169 +113,52 @@
   </div>
 </div>
 
-<!-- INFO MODAL -->
-<div id="info-modal">
-  <div class="info-sheet">
+<!-- ── Info Modal ── -->
+<div id="info-modal" class="modal-backdrop">
+  <div class="modal-sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title">เกี่ยวกับ Collection นี้</div>
     <div class="info-grid">
       <div class="info-card"><div class="info-card-lbl">ราคา</div><div class="info-card-val pink">฿100,000</div></div>
-      <div class="info-card"><div class="info-card-lbl">ประเภท</div><div class="info-card-val" style="font-size:14px;padding-top:4px">Fashion</div></div>
-      <div class="info-card"><div class="info-card-lbl">Edition</div><div class="info-card-val" style="font-size:14px;padding-top:4px">AR Limited</div></div>
-      <div class="info-card"><div class="info-card-lbl">จัดส่ง</div><div class="info-card-val" style="font-size:14px;padding-top:4px">ทั่วไทย 🇹🇭</div></div>
+      <div class="info-card"><div class="info-card-lbl">ประเภท</div><div class="info-card-val" style="font-size:14px">Fashion</div></div>
+      <div class="info-card"><div class="info-card-lbl">Edition</div><div class="info-card-val" style="font-size:14px">AR Limited</div></div>
+      <div class="info-card"><div class="info-card-lbl">จัดส่ง</div><div class="info-card-val" style="font-size:14px">ทั่วไทย 🇹🇭</div></div>
     </div>
-    <p class="info-desc">Hyeen & Ptong Collection เป็น exclusive AR fashion line ผสมผสานดีไซน์โดดเด่นกับเทคโนโลยีล้ำสมัย แต่ละชิ้นทำด้วยมือและมีจำนวนจำกัด</p>
+    <p class="info-desc">Hyeen & Ptong Collection เป็น exclusive AR fashion line แต่ละชิ้นทำด้วยมือและมีจำนวนจำกัด</p>
     <button class="btn-confirm" onclick="document.getElementById('info-modal').classList.remove('open');document.getElementById('order-modal').classList.add('open')">🛍 สั่งซื้อเลย</button>
     <button class="btn-cancel" id="info-close-btn">ปิด</button>
   </div>
 </div>
 
-<!-- SUCCESS -->
+<!-- ── Success ── -->
 <div id="success-overlay">
   <div class="success-icon">✓</div>
   <div class="success-title">สั่งซื้อสำเร็จ!</div>
-  <p class="success-sub">ขอบคุณครับ! เราจะติดต่อกลับเพื่อยืนยันคำสั่งซื้อของคุณ</p>
+  <p class="success-sub">ขอบคุณครับ! เราจะติดต่อกลับเพื่อยืนยันคำสั่งซื้อ</p>
   <button class="success-back" onclick="document.getElementById('success-overlay').classList.remove('show')">← กลับสู่ AR</button>
 </div>
 
-<!-- TOAST -->
 <div id="toast"></div>
 
-
-<!-- ════════════════════════════════════════════
-     MindAR + A-Frame Scene
-════════════════════════════════════════════ -->
+<!-- ── AR Scene ── -->
 <a-scene
   mindar-image="imageTargetSrc: markers/targets.mind; autoStart: false; uiLoading: no; uiError: no; uiScanning: no;"
-  color-space="sRGB"
-  embedded
-  renderer="colorManagement: true; physicallyCorrectLights: true;"
-  vr-mode-ui="enabled: false"
+  color-space="sRGB" embedded vr-mode-ui="enabled: false"
   device-orientation-permission-ui="enabled: false"
-  id="ar-scene"
-  style="display:none; width:100vw; height:100vh; position:fixed; top:0; left:0; z-index:2;">
-
+  id="ar-scene" style="display:none;">
   <a-assets>
     <video id="ar-video" src="hyeen_and_ptong.mp4" preload="auto" playsinline webkit-playsinline crossorigin="anonymous"></video>
   </a-assets>
-
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
   <a-entity mindar-image-target="targetIndex: 0" id="hiro-marker">
-    <!-- วิดีโอ width=1 height=0.5625 = อัตราส่วน 16:9 พอดีกับมาร์กเกอร์ -->
-    <a-video src="#ar-video"
-      width="1" height="0.5625"
-      position="0 0 0.001"
-      rotation="0 0 0"
-      material="side: double; shader: flat">
-    </a-video>
-    <!-- กรอบ -->
-    <a-plane width="1.04" height="0.6"
-      position="0 0 0"
-      material="color: #ff6ec7; opacity: 0.15; side: double; shader: flat">
-    </a-plane>
-    <!-- ชื่อ -->
-    <a-text value="Hyeen & Ptong" align="center" color="#ffffff"
-      width="1.4" position="0 0.42 0"
-      font="https://cdn.aframe.io/fonts/Exo2Bold.fnt">
-    </a-text>
-    <a-text value="Fashion Collection" align="center" color="#ff6ec7"
-      width="1" position="0 0.33 0">
-    </a-text>
-    <!-- ราคา -->
-    <a-text value="฿100,000" align="center" color="#b44fff"
-      width="0.8" position="0 -0.38 0"
-      font="https://cdn.aframe.io/fonts/Exo2Bold.fnt">
-    </a-text>
+    <a-text value="Hyeen & Ptong" align="center" color="#fff" width="1.4" position="0 0.42 0.002" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
+    <a-text value="Fashion Collection" align="center" color="#ff6ec7" width="1" position="0 0.34 0.002"></a-text>
+    <a-plane width="1" height="0.5625" position="0 0 0.001" material="src:#ar-video; shader:flat; side:double;"></a-plane>
+    <a-plane width="1.04" height="0.60" position="0 0 0" material="color:#ff6ec7; opacity:0.2; shader:flat; side:double;"></a-plane>
+    <a-text value="฿100,000" align="center" color="#b44fff" width="0.9" position="0 -0.36 0.002" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
   </a-entity>
-
 </a-scene>
 
-<script>
-  let isPlaying=false, markerFound=false, selectedSize='M';
-  const video=document.getElementById('ar-video');
-  const btnPlay=document.getElementById('btn-play');
-  const controlPanel=document.getElementById('control-panel');
-  const scanWrap=document.getElementById('scan-wrap');
-  const statusText=document.getElementById('status-text');
-  const toast=document.getElementById('toast');
-  const badge=document.getElementById('video-end-badge');
-
-  function showToast(msg,ms=2500){toast.textContent=msg;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),ms)}
-  function selectSize(el){document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');selectedSize=el.textContent}
-
-  // วิดีโอเล่นจบ → โชว์ปุ่ม Order
-  video.addEventListener('ended',()=>{
-    document.getElementById('btn-order').classList.add('revealed');
-    badge.style.display='block';
-    setTimeout(()=>{badge.style.display='none'},4000);
-    showToast('🎬 วิดีโอจบแล้ว!');
-    isPlaying=false; btnPlay.textContent='▶';
-  });
-
-  // ── Splash → Start ──────────────────────────────
-  document.getElementById('start-btn').addEventListener('click',()=>{
-    document.getElementById('splash').classList.add('hidden');
-    const scene=document.getElementById('ar-scene');
-    scene.style.display='block';
-
-    // Start MindAR after scene is visible
-    scene.addEventListener('loaded',()=>{
-      const mindar=scene.systems['mindar-image-system'];
-      if(mindar) mindar.start();
-    },{once:true});
-
-    showToast('📷 กล้องเปิดแล้ว — ชี้ที่รูป "ถูกปาก คนไทย"');
-  });
-
-  // ── MindAR target found/lost ─────────────────────
-  document.querySelector('[mindar-image-target]').addEventListener('targetFound',()=>{
-    if(markerFound) return;
-    markerFound=true;
-    statusText.textContent='พบ marker ✓';
-    scanWrap.classList.add('hidden');
-    controlPanel.classList.add('visible');
-    showToast('✦ Collection โหลดแล้ว!');
-    video.play().then(()=>{isPlaying=true;btnPlay.textContent='⏸'}).catch(()=>{});
-  });
-
-  document.querySelector('[mindar-image-target]').addEventListener('targetLost',()=>{
-    markerFound=false;
-    statusText.textContent='Scanning…';
-    scanWrap.classList.remove('hidden');
-    controlPanel.classList.remove('visible');
-    video.pause(); isPlaying=false; btnPlay.textContent='▶';
-  });
-
-  // ── Play / Pause ──────────────────────────────────
-  btnPlay.addEventListener('click',()=>{
-    if(isPlaying){video.pause();isPlaying=false;btnPlay.textContent='▶';showToast('⏸ หยุดชั่วคราว')}
-    else{video.play().then(()=>{isPlaying=true;btnPlay.textContent='⏸';showToast('▶ กำลังเล่น')}).catch(()=>showToast('แตะ marker ก่อนนะครับ'))}
-  });
-
-  // ── Order modal ───────────────────────────────────
-  document.getElementById('btn-order').addEventListener('click',()=>document.getElementById('order-modal').classList.add('open'));
-  document.getElementById('order-close-btn').addEventListener('click',()=>document.getElementById('order-modal').classList.remove('open'));
-  document.getElementById('order-modal').addEventListener('click',e=>{if(e.target===document.getElementById('order-modal'))document.getElementById('order-modal').classList.remove('open')});
-
-  // ── Info modal ────────────────────────────────────
-  document.getElementById('btn-info').addEventListener('click',()=>document.getElementById('info-modal').classList.add('open'));
-  document.getElementById('info-close-btn').addEventListener('click',()=>document.getElementById('info-modal').classList.remove('open'));
-  document.getElementById('info-modal').addEventListener('click',e=>{if(e.target===document.getElementById('info-modal'))document.getElementById('info-modal').classList.remove('open')});
-
-  // ── Submit order ──────────────────────────────────
-  function submitOrder(){
-    const name=document.getElementById('f-name').value.trim();
-    const phone=document.getElementById('f-phone').value.trim();
-    const address=document.getElementById('f-address').value.trim();
-    if(!name||!phone||!address){showToast('⚠ กรุณากรอกข้อมูลให้ครบ');return}
-    document.getElementById('order-modal').classList.remove('open');
-    setTimeout(()=>document.getElementById('success-overlay').classList.add('show'),300);
-  }
-
-  document.body.addEventListener('touchmove',e=>{
-    if(!e.target.closest('.order-sheet')&&!e.target.closest('.info-sheet'))e.preventDefault();
-  },{passive:false});
-</script>
+<script src="js/ar.js"></script>
 </body>
 </html>
