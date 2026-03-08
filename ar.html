@@ -9,9 +9,10 @@
   <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+    @import url("https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+Kanit: CSS classes);
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Kanit',sans-serif;background:#000;overflow:hidden}
+    body{font-family:'kanit',sans-serif;background:#000;overflow:hidden}
 
     /* SPLASH */
     #splash{position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#0a0008,#1a0015 50%,#0a000f);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:30px;transition:opacity .7s,visibility .7s}
@@ -125,8 +126,8 @@
   <div class="splash-div"></div>
   <p class="splash-desc">Point your camera at the Hiro marker to experience the collection in augmented reality.</p>
   <div class="marker-box">
-    <img src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" alt="Hiro marker"/>
-    <div class="marker-box-txt"><strong>Hiro Marker</strong>Print or display on screen</div>
+    <img src="marker.png" alt="Custom marker" style="filter:none;background:#fff;"/>
+    <div class="marker-box-txt"><strong>ถูกปาก คนไทย</strong>ใช้รูปนี้เป็น marker</div>
   </div>
   <button class="splash-btn" id="start-btn">✦ Launch AR Experience</button>
 </div>
@@ -146,7 +147,7 @@
       <path d="M28 148 L28 172 L52 172" stroke="#ff6ec7" stroke-width="2.5" stroke-linecap="round"/>
       <path d="M172 148 L172 172 L148 172" stroke="#ff6ec7" stroke-width="2.5" stroke-linecap="round"/>
     </svg>
-    <div class="scan-text">Point at Hiro marker</div>
+    <div class="scan-text">ชี้กล้องที่รูป "ถูกปาก คนไทย"</div>
   </div>
 </div>
 
@@ -245,12 +246,12 @@
 <!-- TOAST -->
 <div id="toast"></div>
 
-<!-- A-FRAME AR SCENE -->
-<a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;" vr-mode-ui="enabled: false" renderer="logarithmicDepthBuffer: true; antialias: true;" id="ar-scene" style="display:none;">
+<!-- A-FRAME AR SCENE — ใช้ Custom Pattern Marker -->
+<a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; patternRatio: 0.75;" vr-mode-ui="enabled: false" renderer="logarithmicDepthBuffer: true; antialias: true;" id="ar-scene" style="display:none;">
   <a-assets>
     <video id="ar-video" src="hyeen_and_ptong.mp4" preload="auto" playsinline webkit-playsinline crossorigin="anonymous"></video>
   </a-assets>
-  <a-marker preset="hiro" id="hiro-marker">
+  <a-marker type="pattern" url="custom.patt" id="hiro-marker">
     <!-- วิดีโอตั้งตรง rotation="0 0 0" อยู่กลางมาร์กเกอร์ -->
     <a-video id="ar-video-plane" src="#ar-video" width="2.2" height="1.4" position="0 1.5 0" rotation="0 0 0" material="side: double; shader: flat"></a-video>
     <!-- กรอบเรืองแสง -->
